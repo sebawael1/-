@@ -1,0 +1,31 @@
+{
+  "name": "madinatukum-registration-system",
+  "version": "1.0.0",
+  "description": "نظام التسجيل الإلكتروني المتكامل لمنصة مدينتكم باستخدام TypeScript و Tailwind CSS و Supabase و n8n و Email API",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build:client && tsx server/index.ts",
+    "start": "npm run build:client && tsx server/index.ts",
+    "build:client": "esbuild src/client/app.ts src/client/dashboard.ts --bundle --outdir=public/dist --platform=browser --target=es2020",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "tsx scripts/test-registration-cycle.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.49.1",
+    "cors": "2.8.5",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "nodemailer": "6.10.0"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.17",
+    "@types/express": "5.0.0",
+    "@types/node": "22.13.4",
+    "@types/nodemailer": "6.4.17",
+    "esbuild": "0.25.0",
+    "tailwindcss": "3.4.17",
+    "tsx": "4.19.3",
+    "typescript": "5.7.3"
+  }
+}
