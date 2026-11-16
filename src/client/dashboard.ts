@@ -1,5 +1,8 @@
 import { createClient, type EmailOtpType, type SupabaseClient } from "@supabase/supabase-js";
 
+const CONFIRMATION_SUCCESS_MESSAGE =
+  "تم تأكيد حسابك بنجاح! سعيدين بانضمامك إلى منصتنا مدينتكم 💜";
+
 let supabaseClient: SupabaseClient | null = null;
 
 async function getSupabaseClient(): Promise<SupabaseClient> {
@@ -34,61 +37,160 @@ async function getSupabaseClient(): Promise<SupabaseClient> {
   return supabaseClient;
 }
 
+function showConfirmationSuccess(bannerEl: HTMLElement | null): void {
+  if (!bannerEl) return;
+  bannerEl.classList.remove(
+    "hidden",
+    "bg-red-50",
+    "border-red-200",
+    "text-red-800"
+  );
+  bannerEl.classList.add(
+    "bg-emerald-50",
+    "border-emerald-200",
+    "text-emerald-900"
+  );
+  bannerEl.textContent = CONFIRMATION_SUCCESS_MESSAGE;
+}
+
+function showConfirmationError(
+  bannerEl: HTMLElement | null,
+  loadingEl: HTMLElement | null,
+  rawError?: string | null,
+  errorCode?: string | null
+): void {
+  loadingEl?.classList.add("hidden");
+  if (!bannerEl) return;
+
+  bannerEl.classList.remove(
+    "hidden",
+    "bg-emerald-50",
+    "border-emerald-200",
+    "text-emerald-900"
+  );
+  bannerEl.classList.add(
+    "bg-red-50",
+    "border-red-200",
+    "text-red-800"
+  );
+
+  const lower = `${rawError ?? ""} ${errorCode ?? ""}`.toLowerCase();
+  const errorText =
+    lower.includes("expired") || lower.includes("otp_expired")
+      ? "فشل تأكيد الحساب: انتهت صلاحية رابط التأكيد أو تم استخدامه مسبقاً. يرجى طلب رابط تأكيد جديد."
+      : "فشل تأكيد الحساب: رابط التأكيد غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.";
+
+  bannerEl.innerHTML = "";
+  const p = document.createElement("p");
+  p.className = "font-bold text-sm";
+  p.textContent = errorText;
+  bannerEl.appendChild(p);
+
+  const backLink = document.createElement("a");
+  backLink.href = "/";
+  backLink.className = "inline-block mt-2 text-xs font-bold text-[#28664F] underline";
+  backLink.textContent = "العودة إلى صفحة تسجيل الدخول";
+  bannerEl.appendChild(backLink);
+}
+
 async function initDashboard(): Promise<void> {
   const loadingEl = document.getElementById("dashboard-loading");
   const contentEl = document.getElementById("dashboard-content");
   const bannerEl = document.getElementById("dashboard-banner");
   const logoutBtn = document.getElementById("logout-btn");
 
+  // قراءة معاملات الرابط والـ Hash قبل تهيئة العميل لمعالجة نتيجة تأكيد البريد بدقة
+  const initialHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const urlParams = new URLSearchParams(window.location.search);
+
+  const hashError = initialHashParams.get("error") || urlParams.get("error");
+  const hashErrorCode = initialHashParams.get("error_code") || urlParams.get("error_code");
+  const hashErrorDescription =
+    initialHashParams.get("error_description") || urlParams.get("error_description");
+
+  const hashType = initialHashParams.get("type");
+  const hasHashAccessToken = initialHashParams.has("access_token");
+  const isConfirmedFlag = urlParams.get("confirmed") === "true";
+
+  // 1. إذا عاد المستخدم من رابط تأكيد منتهي الصلاحية أو فاشل
+  if (hashError || hashErrorCode || hashErrorDescription) {
+    showConfirmationError(bannerEl, loadingEl, hashErrorDescription || hashError, hashErrorCode);
+    window.history.replaceState({}, document.title, "/dashboard.html");
+    return;
+  }
+
   try {
     const supabase = await getSupabaseClient();
 
-    // معالجة رابط تأكيد البريد الإلكتروني إذا حضر في عنوان الصفحة (?token_hash=...&type=...)
-    const urlParams = new URLSearchParams(window.location.search);
+    // 2. معالجة رابط تأكيد البريد الإلكتروني إذا حضر في عنوان الصفحة (?token_hash=...&type=... أو ?code=...)
     const tokenHash = urlParams.get("token_hash");
     const otpType = urlParams.get("type") as EmailOtpType | null;
     const authCode = urlParams.get("code");
+
+    let confirmedJustNow = false;
 
     if (tokenHash && otpType) {
       const { error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
         type: otpType,
       });
-      if (!error && bannerEl) {
-        bannerEl.textContent = "تم تأكيد بريدك الإلكتروني وتفعيل حسابك بنجاح!";
-        bannerEl.classList.remove("hidden");
+      if (error) {
+        showConfirmationError(bannerEl, loadingEl, error.message, error.code);
         window.history.replaceState({}, document.title, "/dashboard.html");
+        return;
       }
+      confirmedJustNow = true;
     } else if (authCode) {
       const { error } = await supabase.auth.exchangeCodeForSession(authCode);
-      if (!error && bannerEl) {
-        bannerEl.textContent = "تم تأكيد حسابك وتسجيل دخولك بنجاح!";
-        bannerEl.classList.remove("hidden");
+      if (error) {
+        showConfirmationError(bannerEl, loadingEl, error.message, error.code);
         window.history.replaceState({}, document.title, "/dashboard.html");
+        return;
       }
+      confirmedJustNow = true;
+    } else if (
+      (hasHashAccessToken && (hashType === "signup" || hashType === "email" || hashType === "invite")) ||
+      isConfirmedFlag
+    ) {
+      confirmedJustNow = true;
     }
 
-    // التحقق من الجلسة المحفوظة (Session Persistence)
+    // 3. التحقق من الجلسة المحفوظة (Session Persistence)
     const {
       data: { session },
       error: sessionError,
     } = await supabase.auth.getSession();
 
     if (sessionError || !session) {
+      if (confirmedJustNow) {
+        showConfirmationError(bannerEl, loadingEl, sessionError?.message || "expired");
+        window.history.replaceState({}, document.title, "/dashboard.html");
+        return;
+      }
       window.location.replace("/");
       return;
     }
 
-    // التحقق الفعلي من المستخدم في خادم Supabase Auth
+    // 4. التحقق الفعلي من المستخدم في خادم Supabase Auth
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
+      if (confirmedJustNow) {
+        showConfirmationError(bannerEl, loadingEl, userError?.message || "expired");
+        window.history.replaceState({}, document.title, "/dashboard.html");
+        return;
+      }
       await supabase.auth.signOut();
       window.location.replace("/");
       return;
+    }
+
+    if (confirmedJustNow && user.email_confirmed_at) {
+      showConfirmationSuccess(bannerEl);
+      window.history.replaceState({}, document.title, "/dashboard.html");
     }
 
     const fullName =
@@ -139,6 +241,10 @@ async function initDashboard(): Promise<void> {
       window.location.replace("/");
     });
   } catch (_err) {
+    if (isConfirmedFlag || hasHashAccessToken) {
+      showConfirmationError(bannerEl, loadingEl, "expired");
+      return;
+    }
     window.location.replace("/");
   }
 }

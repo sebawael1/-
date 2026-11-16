@@ -6988,6 +6988,7 @@
   };
 
   // src/client/dashboard.ts
+  var CONFIRMATION_SUCCESS_MESSAGE = "\u062A\u0645 \u062A\u0623\u0643\u064A\u062F \u062D\u0633\u0627\u0628\u0643 \u0628\u0646\u062C\u0627\u062D! \u0633\u0639\u064A\u062F\u064A\u0646 \u0628\u0627\u0646\u0636\u0645\u0627\u0645\u0643 \u0625\u0644\u0649 \u0645\u0646\u0635\u062A\u0646\u0627 \u0645\u062F\u064A\u0646\u062A\u0643\u0645 \u{1F49C}";
   var supabaseClient = null;
   async function getSupabaseClient() {
     if (supabaseClient) return supabaseClient;
@@ -7012,40 +7013,104 @@
     });
     return supabaseClient;
   }
+  function showConfirmationSuccess(bannerEl) {
+    if (!bannerEl) return;
+    bannerEl.classList.remove(
+      "hidden",
+      "bg-red-50",
+      "border-red-200",
+      "text-red-800"
+    );
+    bannerEl.classList.add(
+      "bg-emerald-50",
+      "border-emerald-200",
+      "text-emerald-900"
+    );
+    bannerEl.textContent = CONFIRMATION_SUCCESS_MESSAGE;
+  }
+  function showConfirmationError(bannerEl, loadingEl, rawError, errorCode) {
+    loadingEl?.classList.add("hidden");
+    if (!bannerEl) return;
+    bannerEl.classList.remove(
+      "hidden",
+      "bg-emerald-50",
+      "border-emerald-200",
+      "text-emerald-900"
+    );
+    bannerEl.classList.add(
+      "bg-red-50",
+      "border-red-200",
+      "text-red-800"
+    );
+    const lower = `${rawError ?? ""} ${errorCode ?? ""}`.toLowerCase();
+    const errorText = lower.includes("expired") || lower.includes("otp_expired") ? "\u0641\u0634\u0644 \u062A\u0623\u0643\u064A\u062F \u0627\u0644\u062D\u0633\u0627\u0628: \u0627\u0646\u062A\u0647\u062A \u0635\u0644\u0627\u062D\u064A\u0629 \u0631\u0627\u0628\u0637 \u0627\u0644\u062A\u0623\u0643\u064A\u062F \u0623\u0648 \u062A\u0645 \u0627\u0633\u062A\u062E\u062F\u0627\u0645\u0647 \u0645\u0633\u0628\u0642\u0627\u064B. \u064A\u0631\u062C\u0649 \u0637\u0644\u0628 \u0631\u0627\u0628\u0637 \u062A\u0623\u0643\u064A\u062F \u062C\u062F\u064A\u062F." : "\u0641\u0634\u0644 \u062A\u0623\u0643\u064A\u062F \u0627\u0644\u062D\u0633\u0627\u0628: \u0631\u0627\u0628\u0637 \u0627\u0644\u062A\u0623\u0643\u064A\u062F \u063A\u064A\u0631 \u0635\u0627\u0644\u062D \u0623\u0648 \u0645\u0646\u062A\u0647\u064A \u0627\u0644\u0635\u0644\u0627\u062D\u064A\u0629. \u064A\u0631\u062C\u0649 \u0627\u0644\u0645\u062D\u0627\u0648\u0644\u0629 \u0645\u0631\u0629 \u0623\u062E\u0631\u0649.";
+    bannerEl.innerHTML = "";
+    const p = document.createElement("p");
+    p.className = "font-bold text-sm";
+    p.textContent = errorText;
+    bannerEl.appendChild(p);
+    const backLink = document.createElement("a");
+    backLink.href = "/";
+    backLink.className = "inline-block mt-2 text-xs font-bold text-[#28664F] underline";
+    backLink.textContent = "\u0627\u0644\u0639\u0648\u062F\u0629 \u0625\u0644\u0649 \u0635\u0641\u062D\u0629 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644";
+    bannerEl.appendChild(backLink);
+  }
   async function initDashboard() {
     const loadingEl = document.getElementById("dashboard-loading");
     const contentEl = document.getElementById("dashboard-content");
     const bannerEl = document.getElementById("dashboard-banner");
     const logoutBtn = document.getElementById("logout-btn");
+    const initialHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashError = initialHashParams.get("error") || urlParams.get("error");
+    const hashErrorCode = initialHashParams.get("error_code") || urlParams.get("error_code");
+    const hashErrorDescription = initialHashParams.get("error_description") || urlParams.get("error_description");
+    const hashType = initialHashParams.get("type");
+    const hasHashAccessToken = initialHashParams.has("access_token");
+    const isConfirmedFlag = urlParams.get("confirmed") === "true";
+    if (hashError || hashErrorCode || hashErrorDescription) {
+      showConfirmationError(bannerEl, loadingEl, hashErrorDescription || hashError, hashErrorCode);
+      window.history.replaceState({}, document.title, "/dashboard.html");
+      return;
+    }
     try {
       const supabase = await getSupabaseClient();
-      const urlParams = new URLSearchParams(window.location.search);
       const tokenHash = urlParams.get("token_hash");
       const otpType = urlParams.get("type");
       const authCode = urlParams.get("code");
+      let confirmedJustNow = false;
       if (tokenHash && otpType) {
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
           type: otpType
         });
-        if (!error && bannerEl) {
-          bannerEl.textContent = "\u062A\u0645 \u062A\u0623\u0643\u064A\u062F \u0628\u0631\u064A\u062F\u0643 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0648\u062A\u0641\u0639\u064A\u0644 \u062D\u0633\u0627\u0628\u0643 \u0628\u0646\u062C\u0627\u062D!";
-          bannerEl.classList.remove("hidden");
+        if (error) {
+          showConfirmationError(bannerEl, loadingEl, error.message, error.code);
           window.history.replaceState({}, document.title, "/dashboard.html");
+          return;
         }
+        confirmedJustNow = true;
       } else if (authCode) {
         const { error } = await supabase.auth.exchangeCodeForSession(authCode);
-        if (!error && bannerEl) {
-          bannerEl.textContent = "\u062A\u0645 \u062A\u0623\u0643\u064A\u062F \u062D\u0633\u0627\u0628\u0643 \u0648\u062A\u0633\u062C\u064A\u0644 \u062F\u062E\u0648\u0644\u0643 \u0628\u0646\u062C\u0627\u062D!";
-          bannerEl.classList.remove("hidden");
+        if (error) {
+          showConfirmationError(bannerEl, loadingEl, error.message, error.code);
           window.history.replaceState({}, document.title, "/dashboard.html");
+          return;
         }
+        confirmedJustNow = true;
+      } else if (hasHashAccessToken && (hashType === "signup" || hashType === "email" || hashType === "invite") || isConfirmedFlag) {
+        confirmedJustNow = true;
       }
       const {
         data: { session },
         error: sessionError
       } = await supabase.auth.getSession();
       if (sessionError || !session) {
+        if (confirmedJustNow) {
+          showConfirmationError(bannerEl, loadingEl, sessionError?.message || "expired");
+          window.history.replaceState({}, document.title, "/dashboard.html");
+          return;
+        }
         window.location.replace("/");
         return;
       }
@@ -7054,9 +7119,18 @@
         error: userError
       } = await supabase.auth.getUser();
       if (userError || !user) {
+        if (confirmedJustNow) {
+          showConfirmationError(bannerEl, loadingEl, userError?.message || "expired");
+          window.history.replaceState({}, document.title, "/dashboard.html");
+          return;
+        }
         await supabase.auth.signOut();
         window.location.replace("/");
         return;
+      }
+      if (confirmedJustNow && user.email_confirmed_at) {
+        showConfirmationSuccess(bannerEl);
+        window.history.replaceState({}, document.title, "/dashboard.html");
       }
       const fullName = user.user_metadata?.full_name || user.email?.split("@")[0] || "\u0645\u0633\u062A\u062E\u062F\u0645 \u0645\u062F\u064A\u0646\u062A\u0643\u0645";
       const technicalSkill = user.user_metadata?.technical_skill || "\u063A\u064A\u0631 \u0645\u062D\u062F\u062F";
@@ -7092,6 +7166,10 @@
         window.location.replace("/");
       });
     } catch (_err) {
+      if (isConfirmedFlag || hasHashAccessToken) {
+        showConfirmationError(bannerEl, loadingEl, "expired");
+        return;
+      }
       window.location.replace("/");
     }
   }
