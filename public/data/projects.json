@@ -1,0 +1,31 @@
+
+[
+  {
+    "id": 1,
+    "name": "نظام إدارة المهام",
+    "description": "تطبيق لتنظيم المهام ومتابعة الإنجاز.",
+    "field": "Web Development",
+    "technologies": ["HTML", "CSS", "JavaScript"]
+  },
+  {
+    "id": 2,
+    "name": "التعرف على الصور",
+    "description": "مشروع لتحليل الصور باستخدام الذكاء الاصطناعي.",
+    "field": "Artificial Intelligence",
+    "technologies": ["Python", "TensorFlow"]
+  },
+  {
+    "id": 3,
+    "name": "نظام حماية البيانات",
+    "description": "مشروع لتطبيق أساسيات الأمن السيبراني.",
+    "field": "Cybersecurity",
+    "technologies": ["Python", "Security"]
+  },
+  {
+    "id": 4,
+    "name": "متجر إلكتروني",
+    "description": "واجهة متجر لعرض المنتجات وشرائها.",
+    "field": "Web Development",
+    "technologies": ["React", "CSS"]
+  }
+]

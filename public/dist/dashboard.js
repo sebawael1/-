@@ -6999,7 +6999,9 @@
       if (res.ok) {
         const cfg = await res.json();
         if (cfg.supabaseUrl) supabaseUrl = cfg.supabaseUrl;
-        if (cfg.supabasePublishableKey) supabasePublishableKey = cfg.supabasePublishableKey;
+        if (cfg.supabasePublishableKey) {
+          supabasePublishableKey = cfg.supabasePublishableKey;
+        }
       }
     } catch (_err) {
     }
@@ -7060,7 +7062,9 @@
     const contentEl = document.getElementById("dashboard-content");
     const bannerEl = document.getElementById("dashboard-banner");
     const logoutBtn = document.getElementById("logout-btn");
-    const initialHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const initialHashParams = new URLSearchParams(
+      window.location.hash.replace(/^#/, "")
+    );
     const urlParams = new URLSearchParams(window.location.search);
     const hashError = initialHashParams.get("error") || urlParams.get("error");
     const hashErrorCode = initialHashParams.get("error_code") || urlParams.get("error_code");
@@ -7069,8 +7073,17 @@
     const hasHashAccessToken = initialHashParams.has("access_token");
     const isConfirmedFlag = urlParams.get("confirmed") === "true";
     if (hashError || hashErrorCode || hashErrorDescription) {
-      showConfirmationError(bannerEl, loadingEl, hashErrorDescription || hashError, hashErrorCode);
-      window.history.replaceState({}, document.title, "/dashboard.html");
+      showConfirmationError(
+        bannerEl,
+        loadingEl,
+        hashErrorDescription || hashError,
+        hashErrorCode
+      );
+      window.history.replaceState(
+        {},
+        document.title,
+        "/dashboard.html"
+      );
       return;
     }
     try {
@@ -7085,16 +7098,34 @@
           type: otpType
         });
         if (error) {
-          showConfirmationError(bannerEl, loadingEl, error.message, error.code);
-          window.history.replaceState({}, document.title, "/dashboard.html");
+          showConfirmationError(
+            bannerEl,
+            loadingEl,
+            error.message,
+            error.code
+          );
+          window.history.replaceState(
+            {},
+            document.title,
+            "/dashboard.html"
+          );
           return;
         }
         confirmedJustNow = true;
       } else if (authCode) {
         const { error } = await supabase.auth.exchangeCodeForSession(authCode);
         if (error) {
-          showConfirmationError(bannerEl, loadingEl, error.message, error.code);
-          window.history.replaceState({}, document.title, "/dashboard.html");
+          showConfirmationError(
+            bannerEl,
+            loadingEl,
+            error.message,
+            error.code
+          );
+          window.history.replaceState(
+            {},
+            document.title,
+            "/dashboard.html"
+          );
           return;
         }
         confirmedJustNow = true;
@@ -7106,12 +7137,11 @@
         error: sessionError
       } = await supabase.auth.getSession();
       if (sessionError || !session) {
+        loadingEl?.classList.add("hidden");
+        contentEl?.classList.remove("hidden");
         if (confirmedJustNow) {
-          showConfirmationError(bannerEl, loadingEl, sessionError?.message || "expired");
-          window.history.replaceState({}, document.title, "/dashboard.html");
-          return;
+          showConfirmationSuccess(bannerEl);
         }
-        window.location.replace("/");
         return;
       }
       const {
@@ -7119,18 +7149,17 @@
         error: userError
       } = await supabase.auth.getUser();
       if (userError || !user) {
-        if (confirmedJustNow) {
-          showConfirmationError(bannerEl, loadingEl, userError?.message || "expired");
-          window.history.replaceState({}, document.title, "/dashboard.html");
-          return;
-        }
-        await supabase.auth.signOut();
-        window.location.replace("/");
+        loadingEl?.classList.add("hidden");
+        contentEl?.classList.remove("hidden");
         return;
       }
       if (confirmedJustNow && user.email_confirmed_at) {
         showConfirmationSuccess(bannerEl);
-        window.history.replaceState({}, document.title, "/dashboard.html");
+        window.history.replaceState(
+          {},
+          document.title,
+          "/dashboard.html"
+        );
       }
       const fullName = user.user_metadata?.full_name || user.email?.split("@")[0] || "\u0645\u0633\u062A\u062E\u062F\u0645 \u0645\u062F\u064A\u0646\u062A\u0643\u0645";
       const technicalSkill = user.user_metadata?.technical_skill || "\u063A\u064A\u0631 \u0645\u062D\u062F\u062F";
@@ -7165,12 +7194,10 @@
         await supabase.auth.signOut();
         window.location.replace("/");
       });
-    } catch (_err) {
-      if (isConfirmedFlag || hasHashAccessToken) {
-        showConfirmationError(bannerEl, loadingEl, "expired");
-        return;
-      }
-      window.location.replace("/");
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      loadingEl?.classList.add("hidden");
+      contentEl?.classList.remove("hidden");
     }
   }
   initDashboard();

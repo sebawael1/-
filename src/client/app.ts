@@ -542,15 +542,17 @@ form?.addEventListener("submit", async (event: SubmitEvent) => {
     setMode("signin", true);
     if (emailInput) emailInput.value = validation.sanitized.email;
 
-    showBanner(
-      "info",
-      `تم إنشاء حسابك في Supabase بنجاح! نظراً لأن تأكيد البريد الإلكتروني (Confirm Email) مفعّل في مشروع Supabase، يجب الضغط على رابط التأكيد المرسل إلى (${validation.sanitized.email}) قبل تسجيل الدخول.`,
-      { resendEmailAddress: validation.sanitized.email }
-    );
-  } catch (_err) {
-    setLoadingState(false);
-    showBanner("error", "حدث خطأ أثناء الاتصال بـ Supabase Authentication.");
-  }
+
+showBanner(
+  "info",
+  `تم إنشاء حسابك بنجاح! 💜 تحقق من بريدك الإلكتروني لتأكيد حسابك، وتأكد من مجلد Spam.`,
+  { resendEmailAddress: validation.sanitized.email }
+);
+} catch (_err) {
+  setLoadingState(false);
+  showBanner("error", "حدث خطأ أثناء الاتصال بـ Supabase Authentication.");
+}
 });
+
 
 checkExistingSessionAndUrlTokens();

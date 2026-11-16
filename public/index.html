@@ -1,259 +1,295 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مدينتكم — مدينتك بانتظارك</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <title>مدينتكم | مدينة المستقبل</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              DEFAULT: '#28664F',
-              hover: '#205340',
-              light: '#EAF3EF',
-            }
-          }
-        }
-      }
-    };
-  </script>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      background: #071b18;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 820px;
+      overflow: hidden;
+      isolation: isolate;
+      background: #0b2923;
+    }
+
+    .hero-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: -2;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(
+          270deg,
+          rgba(5, 25, 21, .94) 0%,
+          rgba(5, 25, 21, .78) 35%,
+          rgba(5, 25, 21, .18) 100%
+        ),
+        linear-gradient(
+          0deg,
+          rgba(5, 25, 21, .65),
+          transparent 45%
+        );
+    }
+
+    .accent {
+      color: #8de0bd;
+    }
+
+    .hero-content {
+      width: 100%;
+      max-width: 1700px;
+      margin: auto;
+      padding: 125px 3% 150px;
+      text-align: right;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 6.1vw, 6.5rem);
+      font-weight: 900;
+      line-height: 1.4;
+      letter-spacing: -2px;
+      white-space: nowrap;
+      text-shadow: 0 4px 35px rgba(0,0,0,.3);
+      margin: 0 0 30px;
+    }
+
+    .hero-description {
+      max-width: 780px;
+      font-size: 21px;
+      line-height: 2.1;
+      color: rgba(255,255,255,.8);
+    }
+
+    .login-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #8de0bd;
+      color: #071b18;
+      padding: 12px 30px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: .25s ease;
+    }
+
+    .login-button:hover {
+      background: #b1f0d2;
+      transform: translateY(-2px);
+    }
+
+    .feature-card {
+      border-right: 2px solid #8de0bd;
+      padding-right: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-title {
+        font-size: 5vw;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        min-height: 700px;
+      }
+
+      .hero-overlay {
+        background:
+          linear-gradient(
+            0deg,
+            rgba(5,25,21,.97) 0%,
+            rgba(5,25,21,.78) 65%,
+            rgba(5,25,21,.35) 100%
+          );
+      }
+
+      .hero-content {
+        padding: 130px 6% 120px;
+      }
+
+      .hero-title {
+        font-size: clamp(2rem, 7vw, 3.5rem);
+        white-space: normal;
+        letter-spacing: -1px;
+        line-height: 1.6;
+      }
+
+      .hero-description {
+        font-size: 16px;
+        line-height: 2;
+      }
+
+      .login-button {
+        padding: 10px 22px;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen bg-white text-[#111827] antialiased selection:bg-[#28664F] selection:text-white">
-  <div dir="ltr" class="min-h-screen w-full flex flex-col lg:flex-row">
-    
-    <!-- Left Hero Panel -->
-    <div class="relative w-full lg:w-[58.5%] min-h-[340px] lg:min-h-screen bg-[#122620] overflow-hidden select-none">
+
+<body class="text-white">
+
+  <main>
+
+    <section class="hero">
+
       <img
         src="/assets/riyadh-hero.png"
-        alt="الرياض، كما تحبها - حياتك في المدينة أكثر اتصالاً"
-        class="w-full h-full object-cover object-center"
+        alt="مدينة تقنية مستقبلية"
+        class="hero-image"
       />
-    </div>
 
-    <!-- Right Form Panel -->
-    <div dir="rtl" class="w-full lg:w-[41.5%] min-h-screen bg-white flex flex-col justify-between px-7 sm:px-12 xl:px-16 py-8">
-      
-      <!-- Top Bar: Logo on Right, EN on Left -->
-      <header class="w-full flex items-center justify-between">
-        <a href="/" class="inline-flex items-center focus:outline-none" aria-label="مدينتكم">
-          <img
-            src="/assets/logo.png"
-            alt="شعار مدينتكم"
-            class="h-12 w-auto object-contain"
-          />
+      <div class="hero-overlay"></div>
+
+      <header class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-7 flex items-center justify-between">
+
+        <img
+          src="/assets/logo.png"
+          alt="مدينتكم"
+          class="h-14 w-auto object-contain"
+        />
+
+        <!-- زر تسجيل الدخول -->
+        <a href="/login.html" class="login-button">
+          Log In
         </a>
-        <button
-          type="button"
-          class="text-xs font-semibold text-slate-500 hover:text-slate-800 tracking-wider transition px-2 py-1 rounded"
-        >
-          EN
-        </button>
+
       </header>
 
-      <!-- Center Authentication Form -->
-      <main class="w-full max-w-[420px] mx-auto my-auto py-6">
-        <div class="text-right mb-6">
-          <h1 id="form-title" class="text-[28px] sm:text-[31px] font-extrabold text-[#111827] leading-tight">
-            مدينتك بانتظارك.
+      <div class="relative z-10 hero-content">
+
+        <div class="max-w-full">
+
+          <div class="inline-flex items-center gap-3 bg-white/10 border border-white/15 backdrop-blur-md rounded-full px-5 py-2.5 mb-9">
+
+            <span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+
+            <span class="text-sm text-white/90 font-semibold">
+              مرحبًا بك في مدينتكم
+            </span>
+
+          </div>
+
+          <h1 class="hero-title">
+            مستقبل المدينة <span class="accent">يبدأ بالأفكار.</span>
           </h1>
-          <p id="form-subtitle" class="text-[13.5px] text-slate-400 font-medium mt-1.5">
-            سجّل دخولك، وخلّ يومك أسهل.
+
+          <p class="hero-description">
+            مساحة تجمع المشاريع التقنية والإبداعات الرقمية،
+            وتقرّبك من عالم الابتكار والتقنيات الحديثة.
+            هنا تلتقي الأفكار لتتحول إلى تجارب ومشاريع تصنع المستقبل.
           </p>
+
+          <div class="mt-12 flex items-center gap-4">
+
+            <div class="h-px w-16 bg-emerald-300/80"></div>
+
+            <span class="text-sm tracking-wide text-emerald-100/80">
+              أفكار تتطور، ومستقبل يتشكل
+            </span>
+
+          </div>
+
         </div>
 
-        <!-- Status Alert Box (Loading / Success / Error) -->
-        <div
-          id="status-banner"
-          class="hidden mb-5 rounded-xl p-4 text-xs leading-relaxed border transition-all"
-          role="alert"
-          aria-live="polite"
-        ></div>
+      </div>
 
-        <form id="auth-form" class="space-y-4" novalidate>
-          <!-- Full Name Field (Shown in Sign Up mode) -->
-          <div id="field-wrapper-full_name" class="hidden">
-            <label for="full_name" class="block text-right text-[12px] font-bold text-slate-600 mb-1.5">
-              الاسم الكامل
-            </label>
-            <input
-              id="full_name"
-              name="full_name"
-              type="text"
-              autocomplete="name"
-              placeholder="الاسم الثلاثي أو الكامل"
-              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 transition focus:border-[#28664F] focus:outline-none focus:ring-2 focus:ring-[#28664F]/15"
-            />
-            <p id="error-full_name" class="hidden mt-1 text-[11px] font-medium text-red-600"></p>
+      <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#071b18] to-transparent"></div>
+
+    </section>
+
+    <section class="bg-[#071b18] py-20 px-6 lg:px-12">
+
+      <div class="max-w-7xl mx-auto">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+
+          <div class="feature-card">
+            <p class="text-emerald-300 text-sm font-bold mb-3">
+              01 / المشاريع
+            </p>
+
+            <h2 class="text-2xl font-extrabold mb-3">
+              إبداعات تقنية
+            </h2>
+
+            <p class="text-white/55 text-sm leading-8">
+              تعرّف على مشاريع وأفكار متنوعة في عالم التقنية.
+            </p>
           </div>
 
-          <!-- Email Field -->
-          <div>
-            <label for="email" class="block text-right text-[12px] font-bold text-slate-600 mb-1.5">
-              البريد الإلكتروني
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              dir="ltr"
-              autocomplete="email"
-              placeholder="name@example.com"
-              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-left text-[13px] text-slate-800 placeholder-slate-400 transition focus:border-[#28664F] focus:outline-none focus:ring-2 focus:ring-[#28664F]/15"
-              required
-            />
-            <p id="error-email" class="hidden mt-1 text-[11px] font-medium text-red-600"></p>
+          <div class="feature-card">
+            <p class="text-emerald-300 text-sm font-bold mb-3">
+              02 / المعرفة
+            </p>
+
+            <h2 class="text-2xl font-extrabold mb-3">
+              عالم من الإمكانيات
+            </h2>
+
+            <p class="text-white/55 text-sm leading-8">
+              اكتشف مجالات رقمية وتقنيات تفتح آفاقًا جديدة.
+            </p>
           </div>
 
-          <!-- Password Field -->
-          <div>
-            <label for="password" class="block text-right text-[12px] font-bold text-slate-600 mb-1.5">
-              كلمة المرور
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              dir="ltr"
-              autocomplete="current-password"
-              placeholder="••••••••••••••"
-              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-left text-[13px] text-slate-800 placeholder-slate-400 transition focus:border-[#28664F] focus:outline-none focus:ring-2 focus:ring-[#28664F]/15"
-              required
-            />
-            <p id="error-password" class="hidden mt-1 text-[11px] font-medium text-red-600"></p>
+          <div class="feature-card">
+            <p class="text-emerald-300 text-sm font-bold mb-3">
+              03 / الابتكار
+            </p>
+
+            <h2 class="text-2xl font-extrabold mb-3">
+              أفكار تصنع المستقبل
+            </h2>
+
+            <p class="text-white/55 text-sm leading-8">
+              مساحة تحتفي بالإبداع والتجارب التقنية الجديدة.
+            </p>
           </div>
 
-          <!-- Technical Skill Field (Shown in Sign Up mode) -->
-          <div id="field-wrapper-technical_skill" class="hidden">
-            <label for="technical_skill" class="block text-right text-[12px] font-bold text-slate-600 mb-1.5">
-              المهارة التقنية
-            </label>
-            <input
-              id="technical_skill"
-              name="technical_skill"
-              type="text"
-              list="technical-skills-list"
-              placeholder="مثال: تطوير الويب (TypeScript)، الذكاء الاصطناعي، أتمتة n8n..."
-              class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-slate-800 placeholder-slate-400 transition focus:border-[#28664F] focus:outline-none focus:ring-2 focus:ring-[#28664F]/15"
-            />
-            <datalist id="technical-skills-list">
-              <option value="تطوير الواجهات الأمامية (TypeScript & Tailwind CSS)"></option>
-              <option value="تطوير النظم الخلفية وقواعد البيانات (Supabase & Node.js)"></option>
-              <option value="أتمتة العمليات والربط البرمجي (n8n & Make)"></option>
-              <option value="الذكاء الاصطناعي وعلوم البيانات"></option>
-              <option value="الأمن السيبراني وحماية الأنظمة"></option>
-              <option value="الحوسبة السحابية و DevOps"></option>
-            </datalist>
-            <p id="error-technical_skill" class="hidden mt-1 text-[11px] font-medium text-red-600"></p>
-          </div>
+        </div>
 
-          <!-- Remember Me & Forgot Password Row -->
-          <div class="flex items-center justify-between pt-0.5 pb-1">
-            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
-              <input
-                id="remember-me"
-                type="checkbox"
-                checked
-                class="h-4 w-4 rounded border-slate-300 text-[#28664F] accent-[#28664F] focus:ring-[#28664F]"
-              />
-              <span class="text-[12px] text-slate-500 font-medium">تذكرني</span>
-            </label>
-            <button
-              type="button"
-              id="forgot-password-btn"
-              class="text-[12px] font-bold text-[#28664F] hover:underline"
-            >
-              نسيت كلمة المرور؟
-            </button>
-          </div>
+      </div>
 
-          <!-- Primary Green Action Button -->
-          <button
-            id="submit-btn"
-            type="submit"
-            class="w-full rounded-lg bg-[#28664F] hover:bg-[#205340] active:bg-[#194233] text-white font-bold text-[13.5px] py-3 px-4 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-65 disabled:cursor-not-allowed"
-          >
-            <span id="submit-btn-text">تسجيل الدخول</span>
-            <svg
-              id="submit-spinner"
-              class="hidden animate-spin h-4 w-4 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-            </svg>
-          </button>
+    </section>
 
-          <!-- Secondary Google Button -->
-          <button
-            type="button"
-            id="google-btn"
-            class="w-full rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-[13px] py-2.5 px-4 transition flex items-center justify-center gap-2.5"
-          >
-            <span>المتابعة باستخدام Google</span>
-            <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="#EA4335"
-                d="M12 10.2v3.9h5.4c-.2 1.2-.9 2.3-2 3l3.2 2.5c1.9-1.7 3-4.3 3-7.3 0-.7-.1-1.4-.2-2.1H12z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.8-5.6-4.2H3.1v2.6C4.7 19.8 8.1 22 12 22z"
-              />
-              <path
-                fill="#4A90E2"
-                d="M6.4 13.8c-.2-.6-.3-1.2-.3-1.8s.1-1.2.3-1.8V7.6H3.1C2.4 9 2 10.4 2 12s.4 3 1.1 4.4l3.3-2.6z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9C17 2.9 14.7 2 12 2 8.1 2 4.7 4.2 3.1 7.6l3.3 2.6c.8-2.4 3-4.3 5.6-4.3z"
-              />
-            </svg>
-          </button>
+    <footer class="bg-[#051512] border-t border-white/10 py-6 px-6 text-center">
 
-          <!-- Mode Switcher (Sign In <-> Sign Up) -->
-          <div class="pt-2 text-center">
-            <span id="mode-switch-label" class="text-[12px] text-slate-500">ليس لديك حساب في مدينتكم؟</span>
-            <button
-              type="button"
-              id="mode-switch-btn"
-              class="mr-1 text-[12px] font-bold text-[#28664F] hover:underline focus:outline-none"
-            >
-              إنشاء حساب جديد
-            </button>
-          </div>
-        </form>
-      </main>
+      <p class="text-white/40 text-sm">
+        © مدينتكم — جميع الحقوق محفوظة
+      </p>
 
-      <!-- Footer Links -->
-      <footer class="w-full max-w-[420px] mx-auto text-right pt-4">
-        <p class="text-[11px] text-slate-400">
-          بمتابعتك، أنت توافق على شروط الاستخدام وسياسة الخصوصية.
-        </p>
-        <p class="mt-1">
-          <a href="#support" onclick="return false;" class="text-[11.5px] font-bold text-[#28664F] hover:underline">
-            تحتاج مساعدة؟ تواصل معنا
-          </a>
-        </p>
-      </footer>
-    </div>
-  </div>
+    </footer>
 
-  <script type="module" src="/dist/app.js"></script>
+  </main>
+
 </body>
 </html>
