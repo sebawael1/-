@@ -104,10 +104,17 @@ export async function sendConfirmationEmail(record: RegistrationRecord): Promise
   const prepared = buildPersonalizedConfirmationEmail(record);
   const fromAddress = process.env.EMAIL_FROM || "منصة مدينتكم <no-reply@madinatukum.sa>";
 
-  const logsDir = path.resolve(process.cwd(), "logs", "sent-emails");
-  await fs.mkdir(logsDir, { recursive: true });
-  const emailFileName = `confirmation-${record.id}.html`;
-  await fs.writeFile(path.join(logsDir, emailFileName), prepared.html, "utf8");
+  const baseLogsDir = process.env.VERCEL
+    ? path.join("/tmp", "logs")
+    : path.resolve(process.cwd(), "logs");
+  const logsDir = path.join(baseLogsDir, "sent-emails");
+  try {
+    await fs.mkdir(logsDir, { recursive: true });
+    const emailFileName = `confirmation-${record.id}.html`;
+    await fs.writeFile(path.join(logsDir, emailFileName), prepared.html, "utf8");
+  } catch (_err) {
+    // تجاهل خطأ الكتابة في البيئات السحابية المقيدة
+  }
   const localPreviewPath = `/api/emails/${record.id}`;
 
   // 1. إذا كان مفتاح Resend API متوفراً

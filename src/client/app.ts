@@ -54,15 +54,22 @@ const fieldInputElements: Record<keyof AuthFieldErrors, HTMLInputElement | null>
 async function getSupabase(): Promise<SupabaseClient> {
   if (supabaseClient) return supabaseClient;
 
-  const response = await fetch("/api/public-config");
-  if (!response.ok) {
-    throw new Error("تعذر قراءة إعدادات الاتصال بـ Supabase من الخادم.");
-  }
+  let supabaseUrl = "https://kcowkymogqzwhbhlazux.supabase.co";
+  let supabasePublishableKey = "sb_publishable_Z36TCxRMO11Lr_QkKBDudg_SUVstlDD";
 
-  const { supabaseUrl, supabasePublishableKey } = (await response.json()) as {
-    supabaseUrl: string;
-    supabasePublishableKey: string;
-  };
+  try {
+    const response = await fetch("/api/public-config");
+    if (response.ok) {
+      const cfg = (await response.json()) as {
+        supabaseUrl?: string;
+        supabasePublishableKey?: string;
+      };
+      if (cfg.supabaseUrl) supabaseUrl = cfg.supabaseUrl;
+      if (cfg.supabasePublishableKey) supabasePublishableKey = cfg.supabasePublishableKey;
+    }
+  } catch (_err) {
+    // استخدام إعدادات المشروع العامة (Publishable) عند النشر الثابت
+  }
 
   supabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
     auth: {

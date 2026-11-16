@@ -20,19 +20,14 @@ app.use(express.static(path.resolve(process.cwd(), "public")));
  * مع عدم إرسال أي مفاتيح سرية (SUPABASE_SECRET_KEY) إلى المتصفح نهائياً
  */
 app.get("/api/public-config", (_req: Request, res: Response) => {
-  const supabaseUrl = (process.env.SUPABASE_URL ?? "").trim();
+  const supabaseUrl = (
+    process.env.SUPABASE_URL || "https://kcowkymogqzwhbhlazux.supabase.co"
+  ).trim();
   const supabasePublishableKey = (
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    ""
+    "sb_publishable_Z36TCxRMO11Lr_QkKBDudg_SUVstlDD"
   ).trim();
-
-  if (!supabaseUrl || !supabasePublishableKey) {
-    res.status(500).json({
-      error: "إعدادات SUPABASE_URL أو SUPABASE_PUBLISHABLE_KEY غير متوفرة في ملف .env",
-    });
-    return;
-  }
 
   res.json({
     supabaseUrl,
@@ -111,7 +106,10 @@ app.post("/api/webhooks/n8n-registration", async (req: Request, res: Response) =
 app.get("/api/emails/:id", async (req: Request, res: Response) => {
   try {
     const safeId = String(req.params.id || "").replace(/[^a-zA-Z0-9-]/g, "");
-    const filePath = path.resolve(process.cwd(), "logs", "sent-emails", `confirmation-${safeId}.html`);
+    const baseLogsDir = process.env.VERCEL
+      ? path.join("/tmp", "logs")
+      : path.resolve(process.cwd(), "logs");
+    const filePath = path.join(baseLogsDir, "sent-emails", `confirmation-${safeId}.html`);
     const html = await fs.readFile(filePath, "utf8");
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.send(html);
@@ -164,6 +162,10 @@ app.post("/api/register", async (req: Request, res: Response<RegistrationApiResp
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 خادم منصة مدينتكم يعمل على الرابط: http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 خادم منصة مدينتكم يعمل على الرابط: http://localhost:${PORT}`);
+  });
+}
+
+export default app;

@@ -5,6 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "npm run build:client",
     "dev": "npm run build:client && tsx server/index.ts",
     "start": "npm run build:client && tsx server/index.ts",
     "build:client": "esbuild src/client/app.ts src/client/dashboard.ts --bundle --outdir=public/dist --platform=browser --target=es2020",

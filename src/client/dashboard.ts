@@ -5,14 +5,22 @@ let supabaseClient: SupabaseClient | null = null;
 async function getSupabaseClient(): Promise<SupabaseClient> {
   if (supabaseClient) return supabaseClient;
 
-  const res = await fetch("/api/public-config");
-  if (!res.ok) {
-    throw new Error("تعذر تحميل إعدادات الاتصال بـ Supabase.");
+  let supabaseUrl = "https://kcowkymogqzwhbhlazux.supabase.co";
+  let supabasePublishableKey = "sb_publishable_Z36TCxRMO11Lr_QkKBDudg_SUVstlDD";
+
+  try {
+    const res = await fetch("/api/public-config");
+    if (res.ok) {
+      const cfg = (await res.json()) as {
+        supabaseUrl?: string;
+        supabasePublishableKey?: string;
+      };
+      if (cfg.supabaseUrl) supabaseUrl = cfg.supabaseUrl;
+      if (cfg.supabasePublishableKey) supabasePublishableKey = cfg.supabasePublishableKey;
+    }
+  } catch (_err) {
+    // استخدام إعدادات المشروع العامة (Publishable) عند النشر الثابت
   }
-  const { supabaseUrl, supabasePublishableKey } = (await res.json()) as {
-    supabaseUrl: string;
-    supabasePublishableKey: string;
-  };
 
   supabaseClient = createClient(supabaseUrl, supabasePublishableKey, {
     auth: {

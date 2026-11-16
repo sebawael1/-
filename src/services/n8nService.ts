@@ -63,23 +63,29 @@ export async function processN8nAutomationWorkflow(
   };
 
   // تدوين سجل تنفيذ الأتمتة (Audit Log)
-  const logsDir = path.resolve(process.cwd(), "logs");
-  await fs.mkdir(logsDir, { recursive: true });
-  await fs.appendFile(
-    path.join(logsDir, "n8n-executions.jsonl"),
-    JSON.stringify({
-      workflowExecutionId,
-      processedAt,
-      registrationId: record.id,
-      fullName: record.full_name,
-      email: record.email,
-      technicalSkill: record.technical_skill,
-      emailSent: emailResult.sent,
-      emailProvider: emailResult.provider,
-      previewUrl: emailResult.previewUrl,
-    }) + "\n",
-    "utf8"
-  );
+  const logsDir = process.env.VERCEL
+    ? path.join("/tmp", "logs")
+    : path.resolve(process.cwd(), "logs");
+  try {
+    await fs.mkdir(logsDir, { recursive: true });
+    await fs.appendFile(
+      path.join(logsDir, "n8n-executions.jsonl"),
+      JSON.stringify({
+        workflowExecutionId,
+        processedAt,
+        registrationId: record.id,
+        fullName: record.full_name,
+        email: record.email,
+        technicalSkill: record.technical_skill,
+        emailSent: emailResult.sent,
+        emailProvider: emailResult.provider,
+        previewUrl: emailResult.previewUrl,
+      }) + "\n",
+      "utf8"
+    );
+  } catch (_err) {
+    // تجاهل خطأ الكتابة في البيئات السحابية المقيدة
+  }
 
   return result;
 }
